@@ -1,7 +1,6 @@
-import type { Metadata } from "next";
 import "./globals.css";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Lumen | School Management",
   description: "A clear, modern workspace for running your school.",
 };
