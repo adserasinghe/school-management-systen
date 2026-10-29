@@ -1,0 +1,25 @@
+"use client";
+
+import { BookOpen, MoreHorizontal, Plus, Search, UsersRound } from "lucide-react";
+import { useState } from "react";
+import { classes, subjects } from "@/lib/mock-data";
+import { AppShell } from "@/components/app-shell";
+import { Avatar, Button, Card, PageHeading, ProgressBar } from "@/components/ui";
+
+export default function ClassesPage() {
+  const [activeTab, setActiveTab] = useState<"classes" | "subjects">("classes");
+  return (
+    <AppShell>
+      <PageHeading eyebrow="Academic structure" title="Classes & subjects" description="Organize classrooms, assign teachers, and manage the curriculum." action={<Button><Plus size={16} /> Add {activeTab === "classes" ? "class" : "subject"}</Button>} />
+      <div className="mb-5 flex gap-1 border-b border-line"><button onClick={() => setActiveTab("classes")} className={`border-b-2 px-4 pb-3 text-sm font-bold ${activeTab === "classes" ? "border-brand-500 text-brand-600" : "border-transparent text-muted"}`}>Classes <span className="ml-1 rounded-full bg-canvas px-2 py-0.5 text-[10px]">12</span></button><button onClick={() => setActiveTab("subjects")} className={`border-b-2 px-4 pb-3 text-sm font-bold ${activeTab === "subjects" ? "border-brand-500 text-brand-600" : "border-transparent text-muted"}`}>Subjects <span className="ml-1 rounded-full bg-canvas px-2 py-0.5 text-[10px]">24</span></button></div>
+      {activeTab === "classes" ? <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{classes.map((classItem) => <Card className="p-5" key={classItem.id}><div className="flex items-start justify-between"><div className="flex items-center gap-3"><span className={`flex h-11 w-11 items-center justify-center rounded-xl ${classItem.color} text-sm font-bold text-white`}>{classItem.section}</span><div><h2 className="text-sm font-bold text-ink">{classItem.name} <span className="font-medium text-muted">· {classItem.section}</span></h2><p className="mt-1 text-[11px] text-muted">{classItem.room}</p></div></div><button aria-label={`More options for ${classItem.name} ${classItem.section}`} className="text-muted"><MoreHorizontal size={18} /></button></div><div className="mt-6 grid grid-cols-2 gap-3"><div className="rounded-xl bg-canvas p-3"><div className="flex items-center gap-2 text-muted"><UsersRound size={14} /><span className="text-[10px] font-semibold">Students</span></div><p className="mt-1 text-lg font-bold text-ink">{classItem.students}</p></div><div className="rounded-xl bg-canvas p-3"><div className="flex items-center gap-2 text-muted"><BookOpen size={14} /><span className="text-[10px] font-semibold">Average</span></div><p className="mt-1 text-lg font-bold text-ink">78%</p></div></div><div className="mt-5"><div className="mb-2 flex justify-between text-[11px]"><span className="font-semibold text-muted">Attendance</span><span className="font-bold text-ink">{classItem.attendance}%</span></div><ProgressBar value={classItem.attendance} color={classItem.color} /></div><div className="mt-5 flex items-center justify-between border-t border-line pt-4"><div className="flex -space-x-2"><Avatar initials="DC" className="h-7 w-7 border-2 border-white bg-[#dceaff] text-[9px] text-brand-700" /><Avatar initials="OH" className="h-7 w-7 border-2 border-white bg-[#e7f8f2] text-[9px] text-mint" /></div><span className="text-[11px] font-semibold text-muted">{classItem.teacher}</span></div></Card>)}</div> : <SubjectList />}
+    </AppShell>
+  );
+}
+
+function SubjectList() {
+  const [search, setSearch] = useState("");
+  const visible = subjects.filter((subject) => `${subject.name} ${subject.code}`.toLowerCase().includes(search.toLowerCase()));
+  return <Card className="overflow-hidden"><div className="flex items-center justify-between border-b border-line p-4"><div className="flex items-center gap-2 rounded-xl bg-canvas px-3"><Search size={16} className="text-muted" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search subjects..." className="h-10 w-64 bg-transparent text-xs outline-none" /></div></div><div className="hidden grid-cols-4 border-b border-line bg-canvas px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-[#a1aabc] sm:grid"><span>Subject</span><span>Class</span><span>Teacher</span><span>Average</span></div>{visible.map((subject) => <div key={subject.code} className="grid gap-2 border-b border-line px-5 py-4 last:border-0 sm:grid-cols-4 sm:items-center"><div className="flex items-center gap-3"><span className={`h-8 w-1.5 rounded-full ${subject.color}`} /><div><p className="text-xs font-bold text-ink">{subject.name}</p><p className="mt-0.5 text-[10px] text-muted">{subject.code}</p></div></div><span className="text-xs text-muted">{subject.className}</span><span className="text-xs font-semibold text-ink">{subject.teacher}</span><div><span className="text-xs font-bold text-ink">{subject.average}%</span><div className="mt-1 w-20"><ProgressBar value={subject.average} color={subject.color} /></div></div></div>)}</Card>;
+}
+
