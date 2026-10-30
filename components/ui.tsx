@@ -1,13 +1,25 @@
-import { type ButtonHTMLAttributes, type ReactNode } from "react";
+"use client";
+
+import { type ButtonHTMLAttributes, type ReactNode, useEffect } from "react";
+import { X } from "lucide-react";
 
 export function Card({
   children,
   className = "",
+  onClick,
 }: {
   children: ReactNode;
   className?: string;
+  onClick?: () => void;
 }) {
-  return <section className={`rounded-2xl border border-line bg-white shadow-card ${className}`}>{children}</section>;
+  return (
+    <section
+      onClick={onClick}
+      className={`rounded-2xl border border-line bg-white shadow-card ${className}`}
+    >
+      {children}
+    </section>
+  );
 }
 
 export function Button({
@@ -19,14 +31,14 @@ export function Button({
   variant?: "primary" | "secondary" | "ghost" | "danger";
 }) {
   const styles = {
-    primary: "bg-brand-500 text-white shadow-sm hover:bg-brand-600",
-    secondary: "border border-line bg-white text-ink hover:border-brand-100 hover:bg-brand-50",
-    ghost: "text-muted hover:bg-canvas hover:text-ink",
-    danger: "bg-[#fff0f1] text-coral hover:bg-[#ffe2e5]",
+    primary: "bg-brand-500 text-white shadow-sm hover:bg-brand-600 active:scale-[0.98]",
+    secondary: "border border-line bg-white text-ink hover:border-brand-100 hover:bg-brand-50 active:scale-[0.98]",
+    ghost: "text-muted hover:bg-canvas hover:text-ink active:scale-[0.98]",
+    danger: "bg-[#fff0f1] text-coral hover:bg-[#ffe2e5] active:scale-[0.98]",
   };
   return (
     <button
-      className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${styles[variant]} ${className}`}
+      className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50 ${styles[variant]} ${className}`}
       {...props}
     >
       {children}
@@ -82,8 +94,59 @@ export function PageHeading({
 export function ProgressBar({ value, color = "bg-brand-500" }: { value: number; color?: string }) {
   return (
     <div className="h-2 w-full overflow-hidden rounded-full bg-[#edf0f5]">
-      <div className={`h-full rounded-full ${color}`} style={{ width: `${value}%` }} />
+      <div className={`h-full rounded-full transition-all duration-300 ${color}`} style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
     </div>
   );
 }
 
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  description,
+  children,
+  maxWidth = "max-w-lg",
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  description?: string;
+  children: ReactNode;
+  maxWidth?: string;
+}) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="fixed inset-0 bg-ink/40 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
+      <div className={`relative w-full ${maxWidth} rounded-2xl border border-line bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-150`}>
+        <div className="flex items-start justify-between pb-4">
+          <div>
+            <h2 className="text-lg font-bold text-ink">{title}</h2>
+            {description && <p className="mt-1 text-xs text-muted">{description}</p>}
+          </div>
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-muted hover:bg-canvas hover:text-ink transition-colors"
+            aria-label="Close dialog"
+          >
+            <X size={18} />
+          </button>
+        </div>
+        <div>{children}</div>
+      </div>
+    </div>
+  );
+}
